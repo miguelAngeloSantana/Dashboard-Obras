@@ -14,7 +14,7 @@ export type ObraType = {
     dataFim: Date | null;
     status: /*statusObra*/ string,
     progresso_pct: number
-    orcamentoTotal:  Decimal | null
+    orcamentoTotal:  number | null
     // metodoPeso: metodoPeso
     // estoque Estoque[]
     // etapa   Etapa[]
@@ -223,4 +223,85 @@ export interface ImportResult {
     sucesso: number;
     erros: number;
     detalhes: string[];
+}
+
+export interface MaterialType {
+    id: string;
+    nomeMaterial: string;
+    unidade: string;
+    valor: Decimal,
+    qtdAtual: number;
+    qdtPlanejada: number;
+    qtdMinima: number;
+    obraNome: string[]
+}
+
+export interface MaterialTypeUptade {
+    id: string;
+    qtdAtual: number;
+    qdtPlanejada: number;
+    qtdMinima: number;
+}
+
+export type MaterialTypeError = Partial<Record<keyof MaterialType, string>>
+
+export type MaterialActionResult =
+  | { ok: true;  materialId: string }
+  | { ok: false; erro: string };
+
+
+export type StatusMaterialFiltro = 
+    | "Normal"
+    | "Atenção"
+    | "Critico"
+
+export type FiltrosMaterias = {
+    nome: string,
+    status: "Todos" | StatusMaterialFiltro,
+    obraNome: string,
+    qtdMinima: string,
+    qtdAtual: string,
+    orderBy: | "Nome" | "Quantidade Atual" | "Quantidade Minima" | "Nenhuma",
+    order: "asc" | "desc"
+}
+
+export type FilterTypes = {
+    filtros: FiltrosMaterias,
+    obras: string[],
+    onChange: ( filtros: FiltrosMaterias ) => void,
+    onAplicar: () => void,
+    onLimpar: () => void,
+    onCancelar: () => void
+};
+
+export interface statusType {
+    // id: string;
+    nomeMaterial: string;
+    qdtPlanejada: number | null;
+    qtdAtual: number;
+    obraNome: string[];
+    qtdMinima: number;
+}
+
+export interface TypeDadosMaterial {
+    id: string;
+    valor: number;
+    nomeMaterial: string;
+    qdtPlanejada: number | null;
+    qtdAtual: number;
+    obraNome: string[];
+    qtdMinima: number;
+    unidade: string;
+    lancamento: {
+        id: string;
+        obraId: string;
+        materialId: string | null;
+        etapaId: string | null;
+        valor: number;
+        data: Date;
+        descricao: string | null;
+        notaFiscal: string | null;
+        comprovante: string | null;
+        tipo: TipoLancamento;
+    }[];
 }
