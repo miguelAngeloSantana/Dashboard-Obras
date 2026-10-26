@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { calcMetricaGastoMensal, fimMes, fimMesAnteior, incioMesAnteior, inicioMes } from "@/lib/gastos";
 import ObrasDashboard from "./ObrasDashboard";
+import Header from "./Header";
 
 export default async function InfoObra() {
     const obra = await prisma.obra.findMany({
@@ -54,34 +55,37 @@ export default async function InfoObra() {
     
 
     return (
-        <div className="flex justify-between flex-col items-center w-[94%]">
-            <div className="flex flex-col sm:flex-row gap-7 justify-center sm:justify-between items-center w-full">
-                <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
-                    <span className="text-gray-300 text-base">Obras Ativas</span>
-                    <span className="text-bold text-3xl">{obra.length}</span>
+        <div>
+             <Header />
+            <div className="flex justify-between flex-col items-center w-[94%] mx-auto mt-5">
+                <div className="flex flex-col sm:flex-row gap-7 justify-center sm:justify-between items-center w-full">
+                    <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
+                        <span className="text-gray-300 text-base">Obras Ativas</span>
+                        <span className="text-bold text-3xl">{obra.length}</span>
+                    </div>
+
+                    <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
+                        <span className="text-gray-300 text-base">Gastos Esse mês</span>
+                        <span className="text-bold text-2xl">${metricas.totalMes / 100}K</span>
+                        <span className="text-bold text-base mt-1.5 text-gray-400">+{varia.toFixed(0)}% vs {incioMesAnteior(hoje).toLocaleDateString("pt-br", {month: "long"})}</span>
+                    </div>
+
+                    <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
+                        <span className="text-gray-300 text-base">Pedidos Abertos</span>
+                        <span className="text-bold text-3xl">0</span>
+                    </div>
+
+                    <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
+                        <span className="text-gray-300 text-base">Alerta</span>
+                        <span className="text-red-500 text-center text-4xl font-bold">{h.length}</span>
+                        <span className="text-bold text-base text-gray-400">estoque + prazo</span>
+                    </div>
+
                 </div>
 
-                <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
-                    <span className="text-gray-300 text-base">Gastos Esse mês</span>
-                    <span className="text-bold text-2xl">${metricas.totalMes / 100}K</span>
-                    <span className="text-bold text-base mt-1.5 text-gray-400">+{varia.toFixed(0)}% vs {incioMesAnteior(hoje).toLocaleDateString("pt-br", {month: "long"})}</span>
+                <div className="mt-16 flex justify-center sm:justify-between w-full flex-wrap gap-16 ">
+                    <ObrasDashboard obra={dadosFormatados}/>
                 </div>
-
-                <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
-                    <span className="text-gray-300 text-base">Pedidos Abertos</span>
-                    <span className="text-bold text-3xl">0</span>
-                </div>
-
-                <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
-                    <span className="text-gray-300 text-base">Alerta</span>
-                    <span className="text-red-500 text-center text-4xl font-bold">{h.length}</span>
-                    <span className="text-bold text-base text-gray-400">estoque + prazo</span>
-                </div>
-
-            </div>
-
-            <div className="mt-16 flex justify-center sm:justify-between w-full flex-wrap gap-16 ">
-                <ObrasDashboard obra={dadosFormatados}/>
             </div>
         </div>
     )

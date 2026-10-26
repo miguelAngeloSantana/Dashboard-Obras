@@ -2,18 +2,17 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
 import { ArrowRight } from "lucide-react";
+import Header from "@/components/Header";
 
 export default async function Obras() {
-
-    // const [ obra ] = await Promise.all([getObra])
 
     const teste = await prisma.obra.findMany({
         orderBy: { id: "asc" }
     })
-    // console.log(teste[0].id)
 
     return (
         <>
+            <Header />
             <h1>Obras Salvas</h1>
 
            <ul className="flex flex-col w-full items-center gap-9">

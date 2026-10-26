@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useTransition } from "react";
 
 import { TypeEtapas, EtapaProgressoProps } from "../lib/types";
+
 import { enriquecerEtapa, calcProgObra } from "../lib/calculos";
 
 import EtapaCard from "./EtapaCard";
@@ -18,66 +19,6 @@ const cor_etapa: Record<number, string> = {
 };
 
 const corPorIndice = (i: number) => cor_etapa[i % Object.keys(cor_etapa).length];
-
-// function BarraSegmentoObra({ etapa }: { etapa: ReturnType<typeof enriquecerEtapa> }) {
-//     return (
-//         <div 
-//             role="progressbar"
-//             aria-valuenow={calcProgObra(etapa)}
-//             aria-valuemin={0}
-//             aria-valuemax={100}
-//             aria-label="Progresso total da obra"
-//             className="h-[30] overflow-hidden flex"
-//         >
-//             { etapa.map((e, i) => (
-//                 <div 
-//                     key={e.id} 
-//                     title={`${e.nome}: ${e.progressoCalculado}% x ${formatarPeso(Number(e.pesoAtivo))} = 
-//                         ${e.contribuicaoObra.toFixed(1)}`
-//                     }
-//                     className="h-10 "
-//                     style={{ width: `${Number(e.pesoAtivo) * 100}%`, backgroundColor: corPorIndice(i), 
-//                         opacity: e.progressoCalculado / 100 
-//                     }}
-//                 />
-//             ))}
-//         </div>
-//     );
-// };
-
-// function FormumaDebugBox({ etapa }: { etapa: ReturnType<typeof enriquecerEtapa> }) {
-//     const progObra = calcProgObra(etapa)
-
-//     return (
-//         <div className="mt-12 py-3 px-3.5 text-sm leading-[1.9]">
-//             <div className="font-medium mb-4 text-sm">
-//                 Logica de calculos ativa
-//             </div>
-
-//             { etapa.map(e => {
-//                 const temSubs = e.subEtapas.length > 0;
-//                 const subLabel = temSubs
-//                     ?  `média(${e.subEtapas.map(s => s.progressoPct).join(", ")}) = ${e.progressoPct / 100}%`
-//                     : `slider = ${e.progressoCalculado}%`;
-
-//                 return (
-//                     <div key={e.id}>
-//                         { e.nome  }: { subLabel }
-//                         { "->" }
-//                         {/* <span className="text-[#3B6D11]"> { e.contribuicaoObra.toFixed(1) } ss</span> */}
-//                         <span className="text-[#3B6D11]"> { e.progressoCalculado }% </span>
-//                         {/* <span className="text-[#3B6D11]"> { Math.round((e.progressoPct * e.pesoFixo) / 100) } </span> */}
-
-//                     </div>
-//                 )
-//             })}
-
-//             <div className="mt-6 pt-6 font-medium">
-//                 Obra total = { progObra }%
-//             </div>
-//         </div>
-//     );
-// };
 
 export function EtapaProgresso({ 
     obraNome, 
@@ -191,20 +132,11 @@ export function EtapaProgresso({
                     <button className="border py-2 px-8 rounded-[14px] font-bold text-lg cursor-pointer hover:bg-gray-950">
                         <Link href={`/formularioetapa/${obraId}`}>Adicionar nova etapa</Link>
                     </button>
+
+                    <button>
+                        <Link href="/materias">Registrar material na obra</Link>
+                    </button>
                 </div>
-
-                {/* Barras segmentadas */}
-                {/* <BarraSegmentoObra etapa={etapasRicas} /> */}
-
-                {/* Legenda de cores */}
-                {/* <div className="flex flex-wrap gap-x-3 gap-y-1 my-8">
-                    { etapasRicas.map((e, i) => (
-                        <div key={e.id} className="flex items-center gap-4">
-                            <div className="w-6 h-6 rounded-[50%]" style={{ backgroundColor: corPorIndice(i)}} />
-                            <span className="text-sm">{e.nome}ssssssss</span>
-                        </div>
-                    ))}
-                </div> */}
             </div>
 
             {/* Label da sessão */}
@@ -221,9 +153,6 @@ export function EtapaProgresso({
                     onUptade={handlerUptadeEtapa}
                 />
             ))}
-
-            {/* Debug de formula */}
-            {/* <FormumaDebugBox etapa={etapasRicas}/> */}
         </div>
     )
 }
