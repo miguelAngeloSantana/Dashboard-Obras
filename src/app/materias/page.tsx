@@ -86,10 +86,10 @@ export default async function Materias() {
 
     return (
         <div>
-            <div className="flex justify-between items-center mt-10 px-10">
+            <div className="flex justify-between flex-col sm:flex-row gap-5 items-center mt-10 px-10">
                 <h1 className="text-3xl font-bold">Inventario de materias</h1>
                 <Link href="/materias/formularioMaterial">
-                    <button className="bg-[#162839] p-3 rounded-2xl cursor-pointer">
+                    <button className="bg-[#162839] p-3 rounded-2xl cursor-pointer mb-4 sm:mb-0">
                         <span className="text-lg font-bold">Adicionar Movimentação</span>
                     </button>
                 

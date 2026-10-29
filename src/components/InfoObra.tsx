@@ -58,7 +58,7 @@ export default async function InfoObra() {
         <div>
              <Header />
             <div className="flex justify-between flex-col items-center w-[94%] mx-auto mt-5">
-                <div className="flex flex-col sm:flex-row gap-7 justify-center sm:justify-between items-center w-full">
+                <div className="flex flex-col sm:flex-row sm:px-0 px-5 gap-7 justify-center sm:justify-between items-center w-full">
                     <div className="flex flex-col items-center bg-[#262624] w-full sm:w-3xs py-4 rounded-2xl">
                         <span className="text-gray-300 text-base">Obras Ativas</span>
                         <span className="text-bold text-3xl">{obra.length}</span>
@@ -83,7 +83,7 @@ export default async function InfoObra() {
 
                 </div>
 
-                <div className="mt-16 flex justify-center sm:justify-between w-full flex-wrap gap-16 ">
+                <div className="mt-16 flex px-0 sm:px-3 justify-center sm:justify-between w-full flex-wrap gap-16 ">
                     <ObrasDashboard obra={dadosFormatados}/>
                 </div>
             </div>

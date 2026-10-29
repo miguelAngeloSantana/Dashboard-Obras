@@ -172,7 +172,7 @@ export function TabelMaterias({ dados }: Dados) {
                     >
                         <ListFilter size={18}/>
 
-                        Filtrar e Ordernar
+                        <span className="text-sm sm:text-base">Filtrar e Ordernar</span>
                         { filtrosAtivos && (
                             <span className="rounded-full bg-sky-700 px-2 py-0.5 text-sm">
                                 Ativo
@@ -184,7 +184,7 @@ export function TabelMaterias({ dados }: Dados) {
 
 
             <div className="overflow-x-auto rounded-lg">
-                <table className="min-w-full text-center border rounded-lg">
+                <table className="min-w-full text-center border-collapse sm:border rounded-lg">
                     <thead className="text-sm bg-[#2f2f2f]">
                         <tr>
                             <th className="px-6 py-3 font-semibold">Material</th>

@@ -43,32 +43,7 @@ export function calcProgObra(etapas: TypeEtapas[]): number {
     }, 0)
 
     return Math.round(progressoObra / somaPesos) / 100
-
-    // let somaPesos = 0;
-
-    // const resultado = etapas.reduce((acc, s) => {
-    //     const peso = s.pesoFixoPadrao
-    //     somaPesos += Number(peso);
-
-    //     if (somaPesos === 0) return 0;
-
-    //     return acc + CalcProgDecimal(s) * Number(peso)
-    // }, 0)
-
-    // if (somaPesos === 0) return 0
-
-    // return Math.round(Number(resultado) / somaPesos) / 100;
 };
-
-// function CalcProgDecimal(etapa: TypeEtapas): number {
-//     if (etapa.subEtapa.length === 0) {
-//         return etapa.progressoPct;
-//     };
-
-//     const subComPeso = calcPesoSub(etapa.subEtapa);
-
-//     return subComPeso.reduce((acc, s) => acc + s.progressoPct * s.pesoEfetivo, 0);
-// };
 
 export function enriquecerEtapa(etapas: TypeEtapas[]):EtapaComProgresso[] {
     return etapas.map(etapa => {
