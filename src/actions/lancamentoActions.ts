@@ -9,10 +9,8 @@ import {
     NovoLancamentoFormState,
     NovoLancamentoFormError,
     LancamentoActionResult,
-    LancamentoResult,
-    ImportResult    
+    Despesa
 } from "@/lib/types"
-import { TipoLancamento } from "@/generated/prisma/enums";
 
 export async function validarNovoDados(form: NovoLancamentoFormState): Promise<NovoLancamentoFormError> {
     const erros: NovoLancamentoFormError = {}
@@ -90,86 +88,32 @@ export async function criarLancamento(input: NovoTipoLancamentoInput): Promise<L
     }
 }
 
-export async function inportarLancamento(historico: LancamentoResult[]): Promise<ImportResult> {
-    const detalhes: string[] = [];
-    let sucesso = 0;
-    let erros = 0;
+export async function getObra() {
+    const obra = await prisma.obra.findMany();
 
-    const tmLote = 50;
-
-    for (let i = 0; i < historico.length; i += tmLote) {
-        const lote = historico.slice(i, i + tmLote);
-
-        try {
-            const loteResolvido = await resolverObraId(lote);
-
-            const res = await prisma.lancamento.createMany({
-                data: loteResolvido,
-                skipDuplicates: true
-            })
-
-            sucesso += res.count
-        } catch(error) {
-            console.log(error)
-            erros += lote.length
-            detalhes.push(
-                `Lote ${Math.floor(i / tmLote) + 1} (linha ${i + 1}-${i * lote.length}): ${error instanceof Error ? error.message : "error desconhecido"}`
-            )
-        }
-    }
-
-    revalidatePath("/");
-
-    return { total: historico.length, sucesso, erros, detalhes }
+    return obra;
 }
 
-export async function resolverObraId(lote: LancamentoResult[]): Promise<Array<{
-    obraId: string,
-    etapaId: string | undefined,
-    tipo: TipoLancamento,
-    valor: number,
-    data: Date,
-    descricao: string | undefined,
-    notaFiscal: string | undefined,
-    comprovante: null
-}>> {
-    const nomeResolver = [
-        ...new Set(
-            lote
-                .filter(row => !row.obraId && !row.obraNome)
-                .map(row => row.obraNome as string)
-        )
-    ];
-
-    const obrasEncontradas = nomeResolver.length > 0 ?
-        await prisma.obra.findMany({
+export async function postDespesa(form: Despesa) {
+   try {
+        const getObraId = await prisma.obra.findFirst({
             where: {
-                nome: {
-                    in: nomeResolver
-                }
-            },
-
-            select: {
-                id: true,
-                nome: true
+                nome: form.obraNome
             }
         })
-    : []
 
-    const mapObra = new Map(obrasEncontradas.map(obra => [obra.nome, obra.id]));
+        await prisma.lancamento.create({
+            data: {
+                data: new Date(),
+                obraId: getObraId?.id || "",
+                valor: form.valor,
+                tipo: form.tipo
+            }
+        })
 
-    return lote.map(row => {
-        const obraId = (row.obraId || mapObra.get(row.obraNome ?? "")) ?? ""
-
-        return {
-            obraId,
-            etapaId: row.etapaId,
-            tipo: row.tipo,
-            valor: row.valor,
-            data: row.data,
-            descricao: row.descricao,
-            notaFiscal: row.notaFiscal,
-            comprovante: null
-        }
-    })
+        return { sucess: true }
+   } catch(error) {
+    console.log(`Error ao criar há despesa da obra: ${form.obraNome} - ${error}`)
+    return { ok: false, erro: "Erros ao registrar o lançamento, tente novamente..." }
+   }    
 }

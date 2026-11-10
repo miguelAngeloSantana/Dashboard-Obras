@@ -353,6 +353,7 @@ export default function Formulario(){
                                 <label className="text-md mb-4">Custo de orçamento da etapa</label>
                                 <input 
                                     type="number"
+                                    required
                                     className="border border-zinc-800 shadow-sm h-10 bg-zinc-900 rounded focus:outline p-3 w-[40%] mx-auto"
                                     {...register(`etapa.${index}.custoOrcamento`, {valueAsNumber: true})}
                                 />
@@ -394,7 +395,7 @@ export default function Formulario(){
                                 />
                             </div>
 
-                             <SubItems indexItem={index}/>
+                             {/* <SubItems indexItem={index}/> */}
                         </div>
 
                         

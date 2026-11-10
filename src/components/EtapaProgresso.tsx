@@ -132,10 +132,6 @@ export function EtapaProgresso({
                     <button className="border py-2 px-8 rounded-[14px] font-bold text-lg cursor-pointer hover:bg-gray-950">
                         <Link href={`/formularioetapa/${obraId}`}>Adicionar nova etapa</Link>
                     </button>
-
-                    <button>
-                        <Link href="/materias">Registrar material na obra</Link>
-                    </button>
                 </div>
             </div>
 

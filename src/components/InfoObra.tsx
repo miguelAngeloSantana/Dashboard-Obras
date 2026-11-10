@@ -31,6 +31,11 @@ export default async function InfoObra() {
         }
     })
 
+    const dadosLancamentoAlterados = lancamento.map((e) => ({
+        ...e,
+        valor: Number(e.valor)
+    }))
+
     const anteriorLancamento = await prisma.lancamento.findMany({
         where: {
             data: {
@@ -40,10 +45,14 @@ export default async function InfoObra() {
         }
     });
 
+    const dadosLancamentosAnterioresAlterados = anteriorLancamento.map((e) => ({
+        ...e,
+        valor: Number(e.valor)
+    }))
 
-    const metricasAnteriore = calcMetricaGastoMensal(anteriorLancamento, incioMesAnteior(hoje));
+    const metricasAnteriore = calcMetricaGastoMensal(dadosLancamentosAnterioresAlterados, incioMesAnteior(hoje));
     
-    const metricas = calcMetricaGastoMensal(lancamento, hoje);
+    const metricas = calcMetricaGastoMensal(dadosLancamentoAlterados, hoje);
 
     const varia = ((metricas.totalMes - metricasAnteriore.totalMes) / metricasAnteriore.totalMes) * 100
 

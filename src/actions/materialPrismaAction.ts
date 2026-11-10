@@ -4,44 +4,10 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 
-import { MaterialActionResult,  MaterialTypeError, MaterialTypeUptade } from "@/lib/types";
+import { MaterialActionResult, MaterialTypeUptade } from "@/lib/types";
 
 import { schemaMateriaisType } from "@/components/FormMateriais";
 
-export async function getMaterial() {
-    const material = await prisma.material.findMany({
-        select: {
-            id: true,
-            nomeMaterial: true,
-            unidade: true,
-            obraNome: true,
-            qtdAtual: true,
-            qtdMinima: true,
-            qdtPlanejada: true,
-            valor: true,
-            lacamento: true
-        }
-    });
-    return material
-}
-
-export async function validarDadosEntrada(form: schemaMateriaisType): Promise<MaterialTypeError>{
-    const erros:MaterialTypeError = {} 
-
-    if (!form.nomeMaterial) {
-        erros.nomeMaterial = "Digite o nome do material"
-    };
-
-    if (!form.obraNome) {
-        erros.obraNome = "Escolha uma obra que estara relacionada ao material"
-    };
-
-    if (!form.qdtPlanejada || isNaN(Number(form.qdtPlanejada))) {
-        erros.qdtPlanejada = "Digite uma quantidade planejada para esse material"
-    };
-
-    return erros;
-};
 
 export async function criarMaterial(dados: schemaMateriaisType): Promise<MaterialActionResult> {
     try {

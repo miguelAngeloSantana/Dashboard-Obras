@@ -62,14 +62,6 @@ export function enriquecerEtapa(etapas: TypeEtapas[]):EtapaComProgresso[] {
     });
 };
 
-export function validarPesosEtapa(subs: SubEtapasDB[]): boolean {
-    const totalManual = subs 
-        .filter((e) => e.pesoManual !== null)
-        .reduce((acc, s) => acc + (s.pesoManual as number), 0);
-
-    return totalManual <= 1.0;
-};
-
 export function formatarPeso(peso: number):string {
     return `${Math.round(peso * 100)}%`;
 };

@@ -1,7 +1,6 @@
 import {
     Lancamento,
     MetricaGastoMensal,
-    GastoObraResumo,
     Periodo,
     TipoLancamento
 } from "@/lib/types";
@@ -43,9 +42,7 @@ export function filtrarPeriodo(lancamentos: Lancamento[], de: Date, ate: Date): 
     })  
 };
 
-export function somarLancamentos(lancamentos: Lancamento[]): number {
-    // console.log(lancamentos);
-    
+export function somarLancamentos(lancamentos: Lancamento[]): number {    
     
     return lancamentos.reduce((acc, l) => acc + Number(l.valor), 0);
 };
@@ -70,18 +67,6 @@ export function agruparPorTipoO(lancamentos: Lancamento[]): Map<TipoLancamento, 
     }, new Map<TipoLancamento, number>())
 };
 
-export function calcDesvioOrcamento(gasto: number, orcamento: number | null): number | null {
-    if ( orcamento === null && gasto === 0 ) return null;
-
-    return ( (gasto - (orcamento ?? 0)) / (orcamento ?? 0) ) * 100
-};
-
-export function calcPctOrcamentoConsumido(gasto: number, orcamento: number | null): number | null {
-    if ( orcamento === null && gasto === 0 ) return null;
-
-    return ( gasto / (orcamento ?? 0) ) * 100
-};
-
 export function calcMetricaGastoMensal(lancamentos: Lancamento[], ref: Date = new Date()): MetricaGastoMensal {
     const { de: deMes, ate: ateMes } = periodoMesAntual(ref);
     const { de: deAntes, ate: ateAntes } = periodoMesAnterior(ref);
@@ -98,27 +83,4 @@ export function calcMetricaGastoMensal(lancamentos: Lancamento[], ref: Date = ne
         porObra: agruparPorObra(lancMes),
         porTipo: agruparPorTipoO(lancMes)
     }
-};
-
-export function calcGastoPorObra(
-    lancamentoMes: Lancamento[],
-    lancamentoTotal: Lancamento[],
-    obras: Array<{ id: string, nome: string, orcamentoTotal: number | null }>
-): GastoObraResumo[] {
-    const gastoObraPorMes = agruparPorObra(lancamentoMes);
-    const gastoTotalObra = agruparPorObra(lancamentoTotal);
-
-    return obras.map(obra => {
-        const gastoMes = gastoObraPorMes.get(obra.id) ?? 0;
-        const gastoTotal = gastoTotalObra.get(obra.id) ?? 0;
-
-        return {
-            obraId: obra.id,
-            obraNome: obra.nome, 
-            gastoMes,
-            orcamentoTotal: obra.orcamentoTotal,
-            pctOrcamento: calcPctOrcamentoConsumido(gastoTotal, obra.orcamentoTotal),
-            desvioTotal: calcDesvioOrcamento(gastoTotal, obra.orcamentoTotal)
-        }
-    })
 };

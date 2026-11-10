@@ -1,7 +1,6 @@
 import type { Decimal } from "@prisma/client/runtime/client.d.mts";
 
 export type statusObra = "Planejando" | "Andamento" | "Pausada" | "Atrasada" | "Cancelada";
-export type metodoPeso = "Fixo" | "Orcamento"
 
 export type ObraType = {
     id: string;
@@ -15,46 +14,22 @@ export type ObraType = {
     status: /*statusObra*/ string,
     progresso_pct: number
     orcamentoTotal:  number | null
-    // metodoPeso: metodoPeso
-    // estoque Estoque[]
-    // etapa   Etapa[]
-    // pedidos Pedido[]
 }
 
-export interface ObraInputDados { 
-    /* Esses dados serão enviados para o servidor vindos do formulario*/
-    /** Sera omitido todos os campos gerados automaticamente */
+export type ObraTypeOrcamento = {
+    id: string;
     nome: string;
     endereco: string;
     cep: string | null;
-    clientNome: string;
+    clienteNome: string;
     clientTel: string | null;
     dataInicio: Date;
     dataFim: Date | null;
-    orcamentoTotal: number | null;
+    status: /*statusObra*/ string,
+    progresso_pct: number
+    orcamentoTotal:  number | null
+    lancamentos: Lancamento[]
 }
-
-/** Para os campos que podem ser alterados após a criação */
-export type EditarObraInputDados = Partial<ObraInputDados>;
-
-export interface NovosDadosInput {
-    /** Esse é o estado local do formulario de criação do React */
-    /** Todos os dados estão convertidos para strings pois o input html sempre retorna string */
-     nome: string;
-    endereco: string;
-    cep: string;
-    clientNome: string;
-    clientTel: string;
-    dataInicio: string;
-    dataFim: string
-    orcamentoTotal: string;
-}
-
-/** Type especifico para erros de validação por campo */
-/** Cada chave corresponde a um campo */
-export type ErrosCampoInputObras = Partial<Record<keyof NovosDadosInput, string>>;
-
-
 
 export type SubEtapasDB = {
     id: string;
@@ -80,10 +55,6 @@ export type TypeEtapas = {
     dataFim: Date | null;
     subEtapa: SubEtapasDB[];
 };
-
-export interface ObraComEtapa extends ObraType {
-    etapas: TypeEtapas[]
-}
 
 export interface SubEtapaComPeso extends SubEtapasDB {
     pesoEfetivo: number;
@@ -119,11 +90,6 @@ export type EtapaProgressoProps = {
     onSubEtapaRemove: ( subEtapaId: string ) => Promise<void>;
 }
 
-export type pesoManualForm = {
-    subEtapaId: string;
-    valor: string;
-}
-
 export type TipoLancamento = 
     | "MATERIAL"
     | "MAO_DE_OBRA"
@@ -140,11 +106,17 @@ export interface Lancamento {
     // pedriodoId: string | null;
     etapaId: string | null;
     tipo: TipoLancamento;
-    valor: Decimal;
+    valor: number;
     data: Date;
     descricao: string | null;
     notaFiscal: string | null;
     comprovante: string | null;
+}
+
+export interface Despesa {
+    valor: Decimal,
+    tipo: TipoLancamento,
+    obraNome: string
 }
 
 export interface MetricaGastoMensal {
@@ -231,7 +203,7 @@ export interface MaterialType {
     unidade: string;
     valor: Decimal,
     qtdAtual: number;
-    qdtPlanejada: number;
+    qdtPlanejada: number | null;
     qtdMinima: number;
     obraNome: string[]
 }

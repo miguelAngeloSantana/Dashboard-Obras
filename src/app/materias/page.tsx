@@ -18,7 +18,12 @@ export default async function Materias() {
         }
     });
 
-    const metricas = calcMetricaGastoMensal(lancamento, hoje);
+    const dadosFormatados = lancamento.map((e) => ({
+        ...e,
+        valor: Number(e.valor)
+    }))
+
+    const metricas = calcMetricaGastoMensal(dadosFormatados, hoje);
 
     const critico = await prisma.material.findMany({
        where: {
