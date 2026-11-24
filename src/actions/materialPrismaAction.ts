@@ -16,6 +16,7 @@ export async function criarMaterial(dados: schemaMateriaisType): Promise<Materia
                 nomeMaterial: dados.nomeMaterial,
                 obraNome: [dados.obraNome],
                 qtdAtual: dados.qtdAtual || 0,
+                // qtdAtual: dados.qtdAtual || 0,
                 qtdMinima: dados.qtdMinima || 0,
                 qdtPlanejada: dados.qdtPlanejada,
                 unidade: dados.unidade,

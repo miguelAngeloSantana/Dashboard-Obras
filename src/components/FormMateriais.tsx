@@ -16,14 +16,16 @@ const schemaMateriais = z.object({
     // id: z.string(),
     nomeMaterial: z.string(),
     unidade: z.string(),
-    valor: z.coerce.number(),
-    qtdAtual: z.coerce.number().optional(),
-    qdtPlanejada: z.coerce.number(),
-    qtdMinima: z.coerce.number().optional(),
+    valor: z.number(),
+    qtdAtual: z.number().optional(),
+    qdtPlanejada: z.number(),
+    qtdMinima: z.number().optional(),
     obraNome: z.string()
 })
 
-export type schemaMateriaisType = z.infer<typeof schemaMateriais>
+export type schemaMateriaisType = z.input<typeof schemaMateriais>
+export type schemaMateriaisTypeOutput = z.output<typeof schemaMateriais>
+
 
 type obra = {
     obra: ObraType[]
@@ -49,7 +51,7 @@ export default function FormMateriais({obra}: obra) {
 
     const route = useRouter()
 
-    const { register, handleSubmit } = useForm<schemaMateriaisType>({
+    const { register, handleSubmit } = useForm<schemaMateriaisType, schemaMateriaisTypeOutput>({
         resolver: zodResolver(schemaMateriais),
         defaultValues: {
             nomeMaterial: "",
@@ -61,8 +63,7 @@ export default function FormMateriais({obra}: obra) {
         }
     })
 
-    async function handleSubmitForm(data: schemaMateriaisType, e: React.SubmitEvent) {
-        e.preventDefault();
+    async function handleSubmitForm(data: schemaMateriaisType) {
 
         await criarMaterial({
             ...data,

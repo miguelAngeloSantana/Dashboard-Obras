@@ -9,8 +9,14 @@ import {
     NovoLancamentoFormState,
     NovoLancamentoFormError,
     LancamentoActionResult,
-    Despesa
 } from "@/lib/types"
+import { TipoLancamento } from "@/generated/prisma/enums";
+
+interface DespesaDados {
+    valor: number,
+    tipo: TipoLancamento,
+    obraNome: string
+}
 
 export async function validarNovoDados(form: NovoLancamentoFormState): Promise<NovoLancamentoFormError> {
     const erros: NovoLancamentoFormError = {}
@@ -94,7 +100,7 @@ export async function getObra() {
     return obra;
 }
 
-export async function postDespesa(form: Despesa) {
+export async function postDespesa(form: DespesaDados) {
    try {
         const getObraId = await prisma.obra.findFirst({
             where: {

@@ -9,11 +9,17 @@ import { formatarPeso } from "../lib/calculos";
 import { updatePesoManua } from "@/actions/recalcularProgressoAction";
 
 export default function SubEtapaRow({ sub, totalSubEtapas, onChange, onRemove}: SubEtapaConfig){
-    // console.log(sub.id)
-     const temPesoManual = sub.pesoManual !== null;
-     const pesoAutomatico = (1 / totalSubEtapas) * 100
+
+    const pesoAtual = sub.pesoManual !== null && Number(sub.pesoManual) > 0
+        ?  (Number(sub.pesoManual) > 1 ? Number(sub.pesoManual) / 100 : Number(sub.pesoManual))
+        : null
+
+    const temPesoManual = pesoAtual !== null;
+    
+    const pesoAutomatico = 1 / totalSubEtapas // Escala 0..1 (ex: 0.5 para 2 sub-etapas)
+    
     const [ pesoInput, setPesoInput ] = useState<string>(
-        sub.pesoManual !== null ? String(sub.pesoManual): ""
+        temPesoManual !== null ? String(Math.round(pesoAtual! * 100)) : ""
     );
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -23,30 +29,31 @@ export default function SubEtapaRow({ sub, totalSubEtapas, onChange, onRemove}: 
     };
 
     const abrirEditarPeso = () => {
-        setPesoInput(sub.pesoManual !== null ? String(Math.round(sub.pesoManual *100)): "");
+        setPesoInput(temPesoManual !== null ? String(Math.round(pesoAtual! *100)) : "");
         
         setTimeout(() => inputRef.current?.focus(), 0);
     };
 
     const confirmarPeso = async() => {
-        const valor = parseInt(pesoInput)
-        if (pesoInput == "" || isNaN(valor)){
+        const valor = parseInt(pesoInput);
+
+        if (pesoInput.trim() == "" || isNaN(valor) || valor <= 0){
 
             //volta para os pesos automaticos
             onChange({ ...sub, pesoManual: null });
+            await updatePesoManua(sub.id, null);
+            setPesoInput("");
         } else {
             const pesoNovo = Math.max(0, Math.min(100, valor));
-            await onChange({ ...sub, pesoManual: pesoNovo / 100 });
-            await updatePesoManua(sub.id, pesoNovo);
+            const pesoDecimal = pesoNovo / 100;
+            onChange({ ...sub, pesoManual: pesoDecimal });
+            await updatePesoManua(sub.id, pesoDecimal);
         }
-          setTimeout(() => {
-            window.location.reload();
-        }, 1000);
     };
 
     const resetarParaAuto = async () => {
-        onChange({ ...sub, pesoManual: pesoAutomatico });
-        await updatePesoManua(sub.id, pesoAutomatico)
+        onChange({ ...sub, pesoManual: null });
+        await updatePesoManua(sub.id, null)
         setPesoInput("");
     };
 
@@ -54,8 +61,9 @@ export default function SubEtapaRow({ sub, totalSubEtapas, onChange, onRemove}: 
         if (e.key === "Enter") confirmarPeso();
     };
 
+        // Ambos usam escala 0..1, então formatarPeso (que faz * 100) funciona nos dois!
     const pesoLabel = temPesoManual 
-        ? `Peso manual: ${formatarPeso((sub.pesoManual as number) / 100)}` 
+        ? `Peso manual: ${formatarPeso(pesoAtual)}` 
         : `peso auto: 1/${totalSubEtapas} = ${formatarPeso(pesoAutomatico)}`
 
     return (
@@ -85,18 +93,12 @@ export default function SubEtapaRow({ sub, totalSubEtapas, onChange, onRemove}: 
                     onChange={handlerProgressoChange}
                     aria-label={`Progresso de ${sub.nome}`}
                     className=" cursor-pointer w-full"
-                    style={{ accentColor: "#3B6D11", /*width: 120*/ }}
+                    style={{ accentColor: "#3B6D11" }}
                 />
                 <span className="text-sm font-medium w-[30] text-right">{sub.progressoPct}%</span>
             </div>
 
             {/* Mini barra */}
-            {/* <div className="w-[48] h-4 shrink-0">
-                <div 
-                    className="h-4 rounded-[2]" 
-                    style={{ width: `${sub.progressoPct}%`, backgroundColor: barColors, transition: "width .3s" }}/>
-              
-                </div>ddddd */}
             <div className="flex justify-between w-full sm:justify-start sm:w-auto">
 
                 <button
@@ -106,7 +108,7 @@ export default function SubEtapaRow({ sub, totalSubEtapas, onChange, onRemove}: 
                     aria-label="Definir peso das sub etapas"
                     className="text-sm px-2 py-0.5 rounded-[6] cursor-pointer shrink-0"
                 >
-                    { temPesoManual ? `peso de:  ${(sub.pesoManual)?.toFixed(0)}%`: "pesos" }
+                    { temPesoManual ? `peso de: ${formatarPeso(pesoAtual)}%`: "pesos" }
 
                 </button>
 

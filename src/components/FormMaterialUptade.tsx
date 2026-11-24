@@ -10,16 +10,18 @@ import { useForm } from "react-hook-form";
 
 import uptadeMaterial from "@/actions/materialPrismaAction";
 
-import { MaterialType, MaterialTypeUptade } from "@/lib/types";
+import { MaterialTypeUptade } from "@/lib/types";
 
 const materialUptadeSchema = z.object({
     id: z.string(),
-    qtdAtual: z.int(),
-    qdtPlanejada: z.int(),
-    qdtMinima: z.int() 
+    qtdAtual: z.number(),
+    qdtPlanejada: z.number(),
+    qtdMinima: z.number() 
 })
 
-type materialUptadeType = z.infer< typeof materialUptadeSchema >
+type materialUptadeType = z.input< typeof materialUptadeSchema >
+type materialUptadeTypeOutput = z.output< typeof materialUptadeSchema >
+
 
 function CampoFormularioEdit({ label, obrigatorio = false, children }: {
     label: string, obrigatorio?:boolean, children: React.ReactNode
@@ -38,20 +40,24 @@ export default function FormMaterialUptade(dados: MaterialTypeUptade) {
     
     const query = useSearchParams()
     
-    const { register, handleSubmit } = useForm<materialUptadeType>({
+    const { register, handleSubmit } = useForm<materialUptadeType, materialUptadeTypeOutput>({
         resolver: zodResolver(materialUptadeSchema),
         defaultValues: {
             id: dados.id,
             qtdAtual: Number(query.get("qtdAtual")),
             qdtPlanejada: Number(query.get("qdtPlanejada")),
-            qdtMinima: Number(query.get("qtdMinima"))
+            qtdMinima: Number(query.get("qtdMinima"))
         }
     });
 
-    async function handlerSubmit(materialDate: MaterialType, e: React.SubmitEvent){
-        e.preventDefault();
+    async function handlerSubmit(dadosMaterial: MaterialTypeUptade){
 
-        await uptadeMaterial(materialDate);
+        const dadosTipados:MaterialTypeUptade = {
+            ...dadosMaterial,
+            qdtPlanejada: Number(dadosMaterial.qdtPlanejada)
+        }
+
+        await uptadeMaterial(dadosTipados);
 
         router.back();
     };
@@ -85,7 +91,7 @@ export default function FormMaterialUptade(dados: MaterialTypeUptade) {
                         type="number"
                         // required
                         className="border border-zinc-800 shadow-sm h-10 bg-zinc-900 rounded focus:outline p-3 w-[40%] mx-auto"
-                        {...register("qdtMinima", { valueAsNumber: true })}
+                        {...register("qtdMinima", { valueAsNumber: true })}
                     />
                 </CampoFormularioEdit>
 

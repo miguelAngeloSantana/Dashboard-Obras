@@ -8,6 +8,12 @@ import { useRouter } from "next/navigation";
 
 import formPrismaAction from "../../actions/formPrismaAction";
 
+
+const datasOpcionais = z.preprocess(
+    (val) => (val === "" || val === null ? undefined : val),
+    z.coerce.date().optional()
+);
+
 const schemaSubTarefa = z.object({
     id: z.string().optional(),
     etapaId: z.string().optional(),
@@ -22,9 +28,9 @@ const schemaEtapa = z.object({
     obraId: z.string().optional(),
     nome: z.string(),
     ordem: z.coerce.number(),
-    dataInicio: z.coerce.date().optional(),
-    dataFimPrev: z.coerce.date().optional(),
-    dataFim: z.coerce.date().optional(),
+    dataInicio: datasOpcionais,
+    dataFimPrev: datasOpcionais,
+    dataFim: datasOpcionais,
     progressoPct: z.coerce.number(),
     status: z.string(),
     custoOrcamento: z.coerce.number(),
@@ -43,7 +49,7 @@ const schemaObra = z.object({
     clienteNome: z.string(),
     clientTel: z.string().optional(),
     dataInicio: z.coerce.date(),
-    dataFim: z.coerce.date().optional(),
+    dataFim: datasOpcionais,
     status: z.string(),
     progresso_pct: z.coerce.number(),
     orcamentoTotal: z.coerce.number().optional(),
@@ -54,15 +60,14 @@ interface schemaObraInterface {
     indexItem: number
 }
 
-export type schemaObraType = z.infer<typeof schemaObra>
+export type schemaObraType = z.input<typeof schemaObra>
+type schemaObraTypeOutput = z.output<typeof schemaObra>
 
 export default function Formulario(){
 
     const route = useRouter();
     
-    const date = new Date();
-
-    const { register, control, handleSubmit } = useForm<schemaObraType>({
+    const { register, control, handleSubmit } = useForm({
         resolver: zodResolver(schemaObra),
         defaultValues: {
             nome: "",
@@ -70,7 +75,7 @@ export default function Formulario(){
             cep: "",
             clienteNome: "",
             clientTel: "",
-            dataInicio: new Date(`${date.toLocaleDateString('pt-br', {month: 'long'})} ${date.getFullYear()}`),
+            dataInicio: "",
             dataFim: new Date(),
             status: "",
             progresso_pct: 0,
@@ -79,7 +84,7 @@ export default function Formulario(){
                 {
                     nome: "",
                     ordem: 0,
-                    dataInicio: new Date(),
+                    dataInicio: "",
                     dataFimPrev: new Date(),
                     dataFim: new Date(),
                     progressoPct: 0,
@@ -102,12 +107,6 @@ export default function Formulario(){
         }
     });
 
-    async function handleSubmitForm(data: schemaObraType){
-       formPrismaAction(data)
-
-       route.back()
-    }
-
     function SubItems({indexItem}: schemaObraInterface){
         const { fields } = useFieldArray({
             control,
@@ -117,7 +116,7 @@ export default function Formulario(){
 
         return (
             <div className="mt-10">
-                <h3 className="text-center text-2xl ">Sub etapas 2</h3>
+                <h3 className="text-center text-2xl ">Sub etapas</h3>
                 {
                         fields.map((field, index) => (
                             
@@ -128,7 +127,7 @@ export default function Formulario(){
                                         type="text"
                                         required
                                         className="border border-zinc-800 shadow-sm h-10 bg-zinc-900 rounded focus:outline p-3 w-[40%] mx-auto"
-                                        {...register(`etapa.${index}.subEtapa.${index}.nome`)}
+                                        {...register(`etapa.${indexItem}.subEtapa.${index}.nome`)}
                                     />
                                 </div>
     
@@ -138,7 +137,7 @@ export default function Formulario(){
                                         type="number"
                                         required
                                         className="border border-zinc-800 shadow-sm h-10 bg-zinc-900 rounded focus:outline p-3 w-[40%] mx-auto"
-                                        {...register(`etapa.${index}.subEtapa.${index}.ordem`, {valueAsNumber: true})}
+                                        {...register(`etapa.${indexItem}.subEtapa.${index}.ordem`, {valueAsNumber: true})}
                                     />
                                 </div>
     
@@ -147,7 +146,7 @@ export default function Formulario(){
                                     <input 
                                         type="number"
                                         className="border border-zinc-800 shadow-sm h-10 bg-zinc-900 rounded focus:outline p-3 w-[40%] mx-auto"
-                                        {...register(`etapa.${index}.subEtapa.${index}.progressoPct`, {valueAsNumber: true})}
+                                        {...register(`etapa.${indexItem}.subEtapa.${index}.progressoPct`, {valueAsNumber: true})}
                                     />
                                 </div>
     
@@ -156,7 +155,7 @@ export default function Formulario(){
                                     <input 
                                         type="number"
                                         className="border border-zinc-800 shadow-sm h-10 bg-zinc-900 rounded focus:outline p-3 w-[40%] mx-auto"
-                                        {...register(`etapa.${index}.subEtapa.${index}.pesoManual`, {valueAsNumber: true})}
+                                        {...register(`etapa.${indexItem}.subEtapa.${index}.pesoManual`, {valueAsNumber: true})}
                                     />
                                 </div>
                             </div>
@@ -167,11 +166,28 @@ export default function Formulario(){
 
     }
 
-     const { fields } = useFieldArray({
-            control,
-            name: "etapa",
+    const { fields } = useFieldArray({
+        control,
+        name: "etapa",
     
-        })
+    })
+
+    async function handleSubmitForm(data: schemaObraTypeOutput){
+        const parsed = schemaObra.parse(data)
+
+        const payload: schemaObraTypeOutput = {
+            ...parsed,
+            etapa: data.etapa.map((e) => ({
+                ...e,
+                pesoFixoPadrao: e.pesoFixoPadrao / 100,
+                pesoOrcamento: Number(e.pesoOrcamento)  / 100,
+            })) 
+        };
+        
+        await formPrismaAction(payload);
+
+        route.back();
+    }
 
 
     return(
@@ -270,7 +286,7 @@ export default function Formulario(){
                 </div>
 
                 <div className="flex flex-col text-center justify-center mb-5 w-full">
-                    <label className="text-md mb-4">Orçamento da obra</label>
+                    <label className="text-md mb-4">Orçamento para Realizar a Obra</label>
                     <input 
                         type="number" 
                         step="0.01"
@@ -369,7 +385,7 @@ export default function Formulario(){
                             </div>
 
                              <div className="flex flex-col text-center justify-center mb-5 w-full">
-                                <label className="text-md mb-4">Peso padrão da etapa</label>
+                                <label className="text-md mb-4">Peso da Etapa para o Obra (EX: 1 = 10, 2 = 20)</label>
                                 <input 
                                     type="number"
                                     className="border border-zinc-800 shadow-sm h-10 bg-zinc-900 rounded focus:outline p-3 w-[40%] mx-auto"
@@ -395,7 +411,7 @@ export default function Formulario(){
                                 />
                             </div>
 
-                             {/* <SubItems indexItem={index}/> */}
+                             <SubItems indexItem={index}/>
                         </div>
 
                         

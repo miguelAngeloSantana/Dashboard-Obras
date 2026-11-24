@@ -37,28 +37,8 @@ const schemaEtapa = z.object({
     subEtapa: z.array(schemaSubTarefa)
 });
 
-export type schemaEtapaType = z.infer<typeof schemaEtapa>;
-
-// interface dataFormType {
-//     obraId: string, 
-//         nome: string, 
-//         ordem: number,
-//         status: string, 
-//         pesoFixo: number,
-//         pesoFixoPadrao: number,
-//         pesoOrcamento: number,
-//         custoOrcamento: number, 
-//         dataInicio: Date,
-//         dataFim: Date,
-//         subEtapa: [{
-//             id: string;
-//             etapaId: string;
-//             nome: string;
-//             ordem: number;
-//             progressoPct: number;
-//             pesoManual: number  
-//         }]
-// }
+// type schemaEtapaType = z.infer<typeof schemaEtapa>;
+type schemaEtapaTypeOutput = z.output<typeof schemaEtapa>;
 
 interface PropsObra {
     params: Promise<{ obraId: string }>
@@ -69,7 +49,7 @@ export default function FormEtapa({params}: PropsObra) {
 
     const route = useRouter();
 
-    const { register, control, handleSubmit } = useForm<schemaEtapaType>({
+    const { register, control, handleSubmit } = useForm({
     resolver: zodResolver(schemaEtapa),
     defaultValues: {
         nome: "",
@@ -95,17 +75,20 @@ export default function FormEtapa({params}: PropsObra) {
     }
 })
     
-    async function handleSubmitForm(data: schemaEtapaType) {
+    async function handleSubmitForm(data: schemaEtapaTypeOutput) {
         const { obraId } = await params;
-        String(obraId)
+        String(obraId);
 
-        await formEtapa({
-            ...data,
+        const parse = schemaEtapa.parse(data)
+
+        const payload: schemaEtapaTypeOutput = {
+            ...parse,
             obraId: obraId,
-            custoOrcamento: Number(data.custoOrcamento),
-            pesoFixoPadrao: Number(data.pesoFixoPadrao),
-            pesoOrcamento: Number(data.pesoOrcamento)
-        })
+            pesoFixoPadrao: parse.pesoFixoPadrao / 100,
+            custoOrcamento: parse.custoOrcamento / 100
+        }
+
+        await formEtapa(payload);
 
         route.back();
     }
@@ -208,7 +191,7 @@ export default function FormEtapa({params}: PropsObra) {
                 </div>
 
                    <div className="flex flex-col justify-center items-center mt-5 w-full mb-9 px-2 sm:px-0">
-                    <label className="text-md mb-1">Orçamento disponivel para o obra</label>
+                    <label className="text-md mb-1">Orçamento disponivel para a etapa</label>
                     <input 
                         type="number" 
                         className="border border-zinc-800 shadow-sm h-10 bg-zinc-900 rounded focus:outline 

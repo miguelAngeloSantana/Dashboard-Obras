@@ -50,9 +50,9 @@ export default function EtapaCard({ etapa, cor, onUptade }: EtapaCardProps){
         setNovoNome("");
         setExpandita(true);
 
-        setTimeout(() => {
-            window.location.reload()
-        }, 1000);
+        // setTimeout(() => {
+        //     window.location.reload()
+        // }, 1000);
     };
 
     const hanlderUptadeSub = (subId: string, uptaded: SubEtapasDB) => {
@@ -122,7 +122,7 @@ export default function EtapaCard({ etapa, cor, onUptade }: EtapaCardProps){
                         className="text-base font-medium" 
                         style={{ color: progressoCalculado === 100 ? "#3B6D11": progressoCalculado > 0 ? "#BA7517": "#fff" }}
                     >
-                        {progressoCalculado / 100}%
+                        {progressoCalculado}%
                     </div>
                     
 

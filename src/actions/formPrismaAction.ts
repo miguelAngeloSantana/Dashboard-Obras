@@ -50,6 +50,8 @@ const schemaObra = z.object({
 export default async function formPrismaAction(formData: schemaObraType) {
     const raw = schemaObra.safeParse(formData);
 
+    console.log(JSON.stringify(raw.data))
+
     if (!raw.success){
         return {error: raw.error.message};
     };

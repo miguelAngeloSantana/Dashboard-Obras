@@ -91,11 +91,14 @@ export async function getEtapa(etapaId: string): Promise<TypeEtapas> {
 };
 
 export async function updatePesoManua(subEtapaId: string, peso: number | null): Promise<void> {
-    // console.log(subEtapaId)
-    await prisma.subEtapasDB.update({
+    const pesoUpdate = await prisma.subEtapasDB.update({
         where: { id: subEtapaId },
         data: { pesoManual: peso,  }
     });
+
+    // Recalcula o progresso da etapa e da obra no banco de dados
+    // Devido as sub-etapas presentes nas etapas, o 0 será ignorado será calculo o progresso real ponderado pelos novos pesos
+    await updateProgresso(pesoUpdate.etapaId, null, 0) 
 };
 
 export async function addSubEtapa(etapaId: string, nome: string): Promise<SubEtapasDB> {
@@ -136,11 +139,14 @@ export async function removeSubEtapa( subEtapaId: string ): Promise<void> {
 export async function formEtapa( data:typeSchemaEtapa ) {
     const raw = schemaEtapa.safeParse(data);
 
-    // console.log(raw, raw.data?.subEtapa)
-
     if (!raw.success){
         return {error: raw.error.message};
     };
+
+    const valoresNormalizados = (valor?: number | null) => {
+        if (!valor || valor <= 0) return null;
+        return valor > 1 ? valor / 100 : valor
+    }
 
     const createEtapa = await prisma.etapa.create({
         data: {
@@ -150,8 +156,10 @@ export async function formEtapa( data:typeSchemaEtapa ) {
             status: raw.data.status,
             progressoPct: 0,
             pesoFixo: raw.data.pesoFixo,
-            pesoFixoPadrao: Number(raw.data.pesoFixoPadrao),
-            pesoOrcamento: Number(raw.data.pesoOrcamento),
+            // pesoFixoPadrao: Number(raw.data.pesoFixoPadrao),
+            pesoFixoPadrao: valoresNormalizados(raw.data.pesoFixoPadrao) ?? 0,            
+            // pesoOrcamento: Number(raw.data.pesoOrcamento),
+            pesoOrcamento: valoresNormalizados(raw.data.pesoOrcamento) ?? 0,
             custoOrcamento: Number(raw.data.custoOrcamento),
             custoEtapa: raw.data.custoEtapa,
             dataInicio: raw.data.dataInicio,
@@ -165,7 +173,8 @@ export async function formEtapa( data:typeSchemaEtapa ) {
                     nome: e.nome,
                     ordem: e.ordem,
                     progressoPct: e.progressoPct,
-                    pesoManual: e.pesoManual
+                    // pesoManual: e.pesoManual
+                    pesoManual: valoresNormalizados(e.pesoManual)
                 }))
             }
         }

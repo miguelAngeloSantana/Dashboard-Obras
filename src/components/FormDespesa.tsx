@@ -6,15 +6,17 @@ import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Despesa, ObraType } from "@/lib/types";
+import { ObraType } from "@/lib/types";
 
 import { postDespesa } from "@/actions/lancamentoActions";
 
 import { useRouter } from "next/navigation";
+// import { Decimal } from "@prisma/client/runtime/client";
+// import { TipoLancamento } from "@/generated/prisma/enums";
 
 const schemaDespesa = z.object({
     valor: z.number(),
-    tipo: z.string(),
+    tipo: z.enum(['MATERIAL', 'MAO_DE_OBRA', 'EQUIPAMENTO', 'SERVICO', 'OUTRO']),
     obraNome: z.string(),
 })
 
@@ -52,8 +54,12 @@ export default function FormDespesa({obra}: TypeObras){
         }
     })
 
-    async function handlerSubmit(form: Despesa, e: React.SubmitEvent) {
-        e.preventDefault();
+    async function handlerSubmit(form: schemaTypeDespesa) {
+        // const dadosFormatados: Despesa = {
+        //     ...form,
+        //     valor: new Decimal(form.valor),
+        //     tipo: typeof TipoLancamento
+        // }
 
         await postDespesa(form);
 
@@ -82,7 +88,7 @@ export default function FormDespesa({obra}: TypeObras){
                     className="cursor-pointer"
                     {...register("tipo")}
                 >
-                    <option>Escolha um tipo...</option>
+                    <option value="">Escolha um tipo...</option>
                     <option value="MATERIAL">MATERIAL</option>
                     <option value="MAO_DE_OBRA">MAO DE OBRA</option>
                     <option value="EQUIPAMENTO">EQUIPAMENTO</option>
@@ -98,7 +104,7 @@ export default function FormDespesa({obra}: TypeObras){
                     className="cursor-pointer"
                     {...register("obraNome")}
                 >
-                    <option>Obras salvas...</option>
+                    <option value="">Obras salvas...</option>
                     {
                         obra.map((e) => (
                             <option key={e.id} value={e.nome}>{e.nome}</option>

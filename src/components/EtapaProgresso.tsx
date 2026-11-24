@@ -35,11 +35,19 @@ export function EtapaProgresso({
     const etapasRicas = useMemo(() => enriquecerEtapa(etapa), [etapa]);
     const progObra = useMemo(() => calcProgObra(etapa), [etapa]);
 
+    // console.log(progObra);
+    
+
     const handlerUptadeEtapa = useCallback((uptade: TypeEtapas) => {
         const anterior = etapa.find(e => e.id === uptade.id);
         if (!anterior) return;
 
         setEtapa(prev => prev.map(e => e.id === uptade.id ? uptade: e));
+        // setEtapa(prev => prev.map(e => 
+        //     e.id === uptade.id
+        //     ? { ...e, subEtapa: e.subEtapa.map(s => s.id === uptade.id ? saveSub : s) }
+        //     : e
+        // ))
 
         startTransition(async() => {
             try {
